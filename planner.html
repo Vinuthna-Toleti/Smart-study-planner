@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Planner</title>
+    <link rel="stylesheet" href="study.css">
+</head>
+<body>
+    <div class="container">
+        <h1>&#128197; STUDENT PLANNER</h1>
+        <p id="welcomeMessage"></p>
+        <a href="index.html" class="logout-link">Logout</a>
+
+
+        <!-- day selector-->
+        <div class="week tabs">
+            <button class="day-btn active" data-day="Monday">MONDAY</button>
+            <button class="day-btn active" data-day="Tuesday">TUESDAY</button>
+            <button class="day-btn active" data-day="Wednesday">WEDNESDAY</button>
+            <button class="day-btn active" data-day="Thursday">THURSDAY</button>
+            <button class="day-btn active" data-day="Friday">FRIDAY</button>
+            <button class="day-btn active" data-day="Saturday">SATURDAY</button>
+            <button class="day-btn active" data-day="Sunday">SUNDAY</button>
+        </div>
+
+        <!-- Task input-->
+        <div class="task-input">
+            <input type="text" id="taskTitle" placeholder="Enter Task Title...">
+            <textarea id="taskNotes" placeholder="Enter notes..."></textarea>
+            <input type="date" id="taskDeadline" placeholder="Select Deadline">
+
+            <button id="addTaskBtn">&#10133; Add Task</button>
+        </div>
+
+        <!-- Task list-->
+
+            <div id="taskList" class="task-list"></div>
+    </div>
+
+    <script >
+        let currentDay = "Monday";
+let tasks = JSON.parse(localStorage.getItem("plannerTasks")) || {};
+
+// Show tasks for selected day
+function renderTasks() {
+    let taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    let dayTasks = tasks[currentDay] || [];
+
+    dayTasks.forEach((task, index) => {
+        let card = document.createElement("div");
+        card.className = "task-card";
+
+        let today = new Date().toISOString().split("T")[0];
+
+let title = document.createElement("h3");
+title.textContent = task.title;
+if (task.completed) title.classList.add("completed");
+
+let notes = document.createElement("p");
+notes.textContent = task.notes;
+
+// Deadline
+let deadline = document.createElement("p");
+deadline.textContent = task.deadline ? `Deadline: ${task.deadline}` : "";
+deadline.className = "deadline";
+
+// Highlight task based on deadline
+if (task.deadline) {
+    if (task.deadline < today) {
+        card.classList.add("past-due");
+    } else if (task.deadline === today) {
+        card.classList.add("due-today");
+    }
+}
+
+        // Actions 
+        let actions = document.createElement("div");
+        actions.className = "task-actions";
+
+        let completeBtn = document.createElement("button");
+        completeBtn.textContent = task.completed ? "Undo" : "Complete";
+        completeBtn.className = "complete-btn";
+        completeBtn.onclick = () => {
+            task.completed = !task.completed;
+            saveTasks();
+        };
+
+        let deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = () => {
+            dayTasks.splice(index, 1);
+            saveTasks();
+        };
+
+        actions.appendChild(completeBtn);
+        actions.appendChild(deleteBtn);
+
+        card.appendChild(title);
+        card.appendChild(notes);
+        card.appendChild(deadline);
+        card.appendChild(actions);
+
+
+        taskList.appendChild(card);
+    });
+}
+
+// Save tasks to localStorage
+function saveTasks() {
+    localStorage.setItem("plannerTasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+// Add new task
+document.getElementById("addTaskBtn").addEventListener("click", () => {
+    let title = document.getElementById("taskTitle").value;
+    let notes = document.getElementById("taskNotes").value;
+    let deadline = document.getElementById("taskDeadline").value;
+
+    if (title.trim() === "") {
+        alert("Please enter a task title");
+        return;
+    }
+
+    if (!tasks[currentDay]) tasks[currentDay] = [];
+
+    tasks[currentDay].push({ title, notes, deadline, completed: false });
+
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskNotes").value = "";
+    document.getElementById("taskDeadline").value = "";
+
+    saveTasks();
+});
+
+
+// Change day tab
+document.querySelectorAll(".day-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelector(".day-btn.active")?.classList.remove("active");
+        btn.classList.add("active");
+
+        currentDay = btn.dataset.day;
+        renderTasks();
+    });
+});
+
+// Initial render
+renderTasks();
+
+
+    </script>
+    
+    
+</body>
+</html>

@@ -30,7 +30,7 @@ Follow these steps to run the project locally.
 
 1. Clone this repository:
    
-   git clone YOUR_REPOSITORY_URL
+   git clone https://github.com/Vinuthna-Toleti/Smart-study-planner
 
 2. Open the project folder in Visual Studio Code.
 
